@@ -6,14 +6,11 @@ import ffmpeg._ffmpeg as ffmpeg_load
 import ffmpeg._run as ffmpeg_run
 from datetime import datetime
 import json
-# from flask import Flask
-# serverFlask = Flask(__name__)
 
 # important const
 HEADER = 64
 PORT = 5052
-# SERVER = socket.gethostbyname(socket.gethostname())
-SERVER = '0.0.0.0'
+SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = "utf-8"
 BUFFER_SIZE = 4096
@@ -24,7 +21,6 @@ server.bind(ADDR)
 
 
 def convert_video(input_file, output_file):
-
     filesize = 0
     try:
         with open(input_file) as f:
@@ -45,10 +41,9 @@ def handle_client(conn, addr):
     res = conn.recv(BUFFER_SIZE).decode("utf-8")
     header = json.loads(res)
 
-    # print(f"[SERVER] Header: {header}")
+    print(f"[SERVER] Header: {header}")
 
     conn.send(bytes("... Por favor espere ...", "utf-8"))
-    # conn.send(bytes("[WAITING] In case this is getting so long, press CTRL+C","utf-8"))
 
     threading.current_thread().setName(header['input_name'])
     filesize = int(header['filesize'])
@@ -71,22 +66,13 @@ def handle_client(conn, addr):
         print(size)
 
         if not result:
-            # conn.sendall(f"False{SEPARATOR}{size}")
-            # conn.send("Hola Mundo")
-            # conn.send(bytes(f"False{SEPARATOR}{size}", "utf-8"))
-            my_json = {
-                "status": False,
-                "size" : size,
-            }
-            json_response = bytes(json.dumps(my_json), "utf-8")
-
+            conn.sendall(f"False{SEPARATOR}{size}")
         else:
             conn.send(bytes(f"True{SEPARATOR}{size}", "utf-8"))
 
             with open(output_file, "rb") as file:
                 bytes_read = file.read(BUFFER_SIZE)
                 while bytes_read:
-                    # print(f"bytes read: {bytes_read}")
                     conn.sendall(bytes_read)
                     bytes_read = file.read(BUFFER_SIZE)
                 file.close()
@@ -94,15 +80,16 @@ def handle_client(conn, addr):
     except Exception as e:
         print(e)
         conn.close()
-    fi
+    finally:
         shutil.rmtree(f"./conversion")
         print('Carpeta eliminada')
 
-# @serverFlask.route("/")
+
 def start():
     server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
-    no now.strftime("%H:%M:%S")
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
     print(f"[TIME] Server Time: {current_time}")
     while True:
         conn, addr = server.accept()
@@ -112,11 +99,5 @@ def start():
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
 
 
-
-# print("[STARTING] server is starting...")
-# start()
-
-if __name__ == '__main__':
-    # serverFlask.run(host='0.0.0.0')
-    print("[STARTING] server is starting...")
-    start()
+print("[STARTING] server is starting...")
+start()
