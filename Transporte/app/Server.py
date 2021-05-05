@@ -73,7 +73,12 @@ def handle_client(conn, addr):
         if not result:
             # conn.sendall(f"False{SEPARATOR}{size}")
             # conn.send("Hola Mundo")
-            conn.send(bytes(f"False{SEPARATOR}{size}", "utf-8"))
+            # conn.send(bytes(f"False{SEPARATOR}{size}", "utf-8"))
+            my_json = {
+                "status": False,
+                "size" : size,
+            }
+            json_response = bytes(json.dumps(my_json), "utf-8")
 
         else:
             conn.send(bytes(f"True{SEPARATOR}{size}", "utf-8"))
@@ -89,7 +94,7 @@ def handle_client(conn, addr):
     except Exception as e:
         print(e)
         conn.close()
-    finally:
+    fi
         shutil.rmtree(f"./conversion")
         print('Carpeta eliminada')
 
@@ -97,8 +102,7 @@ def handle_client(conn, addr):
 def start():
     server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
+    no now.strftime("%H:%M:%S")
     print(f"[TIME] Server Time: {current_time}")
     while True:
         conn, addr = server.accept()
